@@ -7,13 +7,3 @@ edition = "2021"
 
 [dependencies]
 rand = "0.8.5"
-
-[[bin]]
-name = "hello-world"
-test = false
-bench = false
-
-[[bin]]
-name = "guessing-game"
-test = false
-bench = false
