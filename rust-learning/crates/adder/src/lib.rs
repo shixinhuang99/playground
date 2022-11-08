@@ -1,3 +1,15 @@
+//! # adder
+//!
+//! somthing
+
+/// Add two integers together
+///
+/// # Examples
+///
+/// ```
+/// let answer = adder::add(1, 2);
+/// assert_eq!(3, answer);
+/// ```
 pub fn add(left: usize, right: usize) -> usize {
     left + right
 }
@@ -22,10 +34,22 @@ pub fn greeting(name: &str) -> String {
 }
 
 pub struct Guess {
-    _value: i32,
+    pub value: i32,
 }
 
 impl Guess {
+    /// create instance of `Guess`
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let guess = adder::Guess::new(3);
+    /// assert_eq!(guess.value, 3);
+    /// ```
+    ///
+    /// # Panics
+    ///
+    /// Panics if argument not in (1, 100)
     pub fn new(value: i32) -> Guess {
         if value < 1 {
             panic!(
@@ -38,7 +62,7 @@ impl Guess {
                 value
             );
         }
-        Guess { _value: value }
+        Guess { value }
     }
 }
 
@@ -100,9 +124,17 @@ mod tests {
     }
 
     #[test]
-    #[should_panic(expected = "Guess value must be less than or equal to 100")]
+    #[should_panic(
+        expected = "Guess value must be less than or equal to 100, got 200"
+    )]
     fn greater_than_100() {
         Guess::new(200);
+    }
+
+    #[test]
+    fn in_range() {
+        let guess = Guess::new(3);
+        assert_eq!(guess.value, 3);
     }
 
     #[test]

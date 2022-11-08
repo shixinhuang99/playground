@@ -9,24 +9,22 @@ pub struct Config {
 }
 
 impl Config {
-    pub fn new(args: &[String]) -> Result<Config, &'static str> {
-        let mut options = Vec::new();
-        let mut not_options = Vec::new();
-        for i in args {
-            if i.starts_with("--") {
-                options.push(i);
-            } else {
-                not_options.push(i)
-            }
-        }
-        if not_options.len() < 3 {
-            return Err("not enough arguments");
-        }
+    pub fn new(args: env::Args) -> Result<Config, &'static str> {
+        let (options, not_options): (Vec<_>, Vec<_>) =
+            args.partition(|arg| arg.starts_with("--"));
 
-        let query = not_options[1].clone();
-        let filename = not_options[2].clone();
+        let mut not_options_iter = not_options.into_iter().skip(1);
+        let query = match not_options_iter.next() {
+            Some(arg) => arg,
+            None => return Err("Didn't get a query string"),
+        };
+        let filename = match not_options_iter.next() {
+            Some(arg) => arg,
+            None => return Err("Didn't ge a file name"),
+        };
+
         let case_sensitive =
-            if options.contains(&&String::from("--case-insensitive")) {
+            if options.contains(&String::from("--case-insensitive")) {
                 false
             } else {
                 env::var("CASE_INSENSITIVE").is_err()
@@ -57,15 +55,10 @@ pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
 }
 
 pub fn search<'a>(query: &str, contents: &'a str) -> Vec<&'a str> {
-    let mut results = Vec::new();
-
-    for line in contents.lines() {
-        if line.contains(query) {
-            results.push(line);
-        }
-    }
-
-    results
+    contents
+        .lines()
+        .filter(|line| line.contains(query))
+        .collect()
 }
 
 pub fn search_case_insensitive<'a>(
@@ -73,15 +66,10 @@ pub fn search_case_insensitive<'a>(
     contents: &'a str,
 ) -> Vec<&'a str> {
     let query = query.to_lowercase();
-    let mut results = Vec::new();
-
-    for line in contents.lines() {
-        if line.to_lowercase().contains(&query) {
-            results.push(line)
-        }
-    }
-
-    results
+    contents
+        .lines()
+        .filter(|line| line.to_lowercase().contains(&query))
+        .collect()
 }
 
 #[cfg(test)]

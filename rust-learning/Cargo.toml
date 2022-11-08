@@ -2,8 +2,8 @@
 name = "rust-learning"
 version = "0.1.0"
 edition = "2021"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+description = "playground for rust learning"
+license = "MIT"
 
 [dependencies]
 rand = "0.8.5"
@@ -12,3 +12,6 @@ aggregator = { path = "./crates/aggregator" }
 
 [workspace]
 members = ["crates/*"]
+
+[profile.dev]
+opt-level = 1
