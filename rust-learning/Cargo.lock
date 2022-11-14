@@ -40,6 +40,10 @@ name = "guess"
 version = "0.1.0"
 
 [[package]]
+name = "gui"
+version = "0.1.0"
+
+[[package]]
 name = "libc"
 version = "0.2.137"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -95,6 +99,7 @@ version = "0.1.0"
 dependencies = [
  "aggregator",
  "guess",
+ "gui",
  "rand",
 ]
 

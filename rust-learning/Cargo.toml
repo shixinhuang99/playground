@@ -9,6 +9,7 @@ license = "MIT"
 rand = "0.8.5"
 guess = { path = "./crates/guess" }
 aggregator = { path = "./crates/aggregator" }
+gui = { path = "./crates/gui" }
 
 [workspace]
 members = ["crates/*"]
