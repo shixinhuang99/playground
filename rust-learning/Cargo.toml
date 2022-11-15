@@ -10,6 +10,7 @@ rand = "0.8.5"
 guess = { path = "./crates/guess" }
 aggregator = { path = "./crates/aggregator" }
 gui = { path = "./crates/gui" }
+blog = { path = "./crates/blog" }
 
 [workspace]
 members = ["crates/*"]
