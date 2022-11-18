@@ -1,5 +1,5 @@
 [package]
-name = "rust-learning"
+name = "rust_learning"
 version = "0.1.0"
 edition = "2021"
 description = "playground for rust learning"
@@ -11,6 +11,8 @@ guess = { path = "./crates/guess" }
 aggregator = { path = "./crates/aggregator" }
 gui = { path = "./crates/gui" }
 blog = { path = "./crates/blog" }
+hello_macro = { path = "./crates/hello_macro" }
+hello_macro_derive = { path = "./crates/hello_macro_derive" }
 
 [workspace]
 members = ["crates/*"]
