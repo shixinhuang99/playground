@@ -1,0 +1,8 @@
+[package]
+name = "async-in-rust"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[dependencies]
+futures = "0.3.26"
