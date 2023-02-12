@@ -1,4 +1,4 @@
-use rust_learning::myvec;
+use rust_book::myvec;
 use hello_macro::HelloMacro;
 use hello_macro_derive::HelloMacro;
 

@@ -3,7 +3,7 @@ use std::io::prelude::*;
 use std::fs;
 use std::thread;
 use std::time::Duration;
-use rust_learning::ThreadPool;
+use rust_book::ThreadPool;
 
 fn handle_connection(mut stream: TcpStream) {
     let mut buffer = [0; 1024];
