@@ -15,14 +15,14 @@ use futures::{
 
 struct SharedState {
     completed: bool,
-    walker: Option<Waker>,
+    waker: Option<Waker>,
 }
 
 impl SharedState {
     fn new() -> Arc<Mutex<Self>> {
         Arc::new(Mutex::new(SharedState {
             completed: false,
-            walker: None,
+            waker: None,
         }))
     }
 }
@@ -40,7 +40,7 @@ impl TimerFuture {
             thread::sleep(duration);
             let mut shared_state = thread_shared_state.lock().unwrap();
             shared_state.completed = true;
-            if let Some(waker) = shared_state.walker.take() {
+            if let Some(waker) = shared_state.waker.take() {
                 waker.wake();
             }
         });
@@ -57,7 +57,7 @@ impl Future for TimerFuture {
         if shared_state.completed {
             Poll::Ready(())
         } else {
-            shared_state.walker = Some(cx.waker().clone());
+            shared_state.waker = Some(cx.waker().clone());
             Poll::Pending
         }
     }
