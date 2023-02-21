@@ -1,22 +1,20 @@
-use std::collections::VecDeque;
 use std::future::Future;
 use std::pin::Pin;
-use std::task::{Context, Poll};
+use std::sync::{Arc, Mutex};
+use std::task::{Context, Poll, Waker};
 use std::thread;
 use std::time::{Duration, Instant};
 
-use futures::task;
+use crossbeam::channel;
+use futures::task::{self, ArcWake};
 
-#[tokio::main]
-async fn main() {
+fn main() {
     let mut mini_tokio = MiniTokio::new();
 
     mini_tokio.spawn(async {
         let when = Instant::now() + Duration::from_secs(3);
-        let fut = Delay { when };
-        let out = fut.await;
-
-        println!("{}", out);
+        let fut = Delay { when, waker: None };
+        fut.await;
     });
 
     mini_tokio.run();
@@ -24,60 +22,107 @@ async fn main() {
 
 struct Delay {
     when: Instant,
+    waker: Option<Arc<Mutex<Waker>>>,
 }
 
 impl Future for Delay {
-    type Output = &'static str;
+    type Output = ();
 
-    fn poll(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Self::Output> {
-        if Instant::now() >= self.when {
-            return Poll::Ready("done");
+    fn poll(
+        mut self: Pin<&mut Self>,
+        cx: &mut Context<'_>,
+    ) -> Poll<Self::Output> {
+        if let Some(waker) = &self.waker {
+            let mut waker = waker.lock().unwrap();
+
+            if !waker.will_wake(cx.waker()) {
+                *waker = cx.waker().clone();
+            }
+        } else {
+            let when = self.when;
+            let waker = Arc::new(Mutex::new(cx.waker().clone()));
+            self.waker = Some(waker.clone());
+
+            thread::spawn(move || {
+                let now = Instant::now();
+
+                if now < when {
+                    thread::sleep(when - now);
+                }
+
+                let waker = waker.lock().unwrap();
+                waker.wake_by_ref();
+            });
         }
 
-        let waker = cx.waker().clone();
-        let when = self.when;
-
-        thread::spawn(move || {
-            let now = Instant::now();
-            if now < when {
-                thread::sleep(when - now);
-            }
-
-            waker.wake();
-        });
-
-        Poll::Pending
+        if Instant::now() >= self.when {
+            Poll::Ready(())
+        } else {
+            Poll::Pending
+        }
     }
 }
 
-type Task = Pin<Box<dyn Future<Output = ()> + Send>>;
-
 struct MiniTokio {
-    tasks: VecDeque<Task>,
+    scheduled: channel::Receiver<Arc<Task>>,
+    sender: channel::Sender<Arc<Task>>,
+}
+
+struct Task {
+    future: Mutex<Pin<Box<dyn Future<Output = ()> + Send>>>,
+    executor: channel::Sender<Arc<Task>>,
+}
+
+impl Task {
+    fn schedule(self: &Arc<Self>) {
+        let _ = self.executor.send(self.clone());
+    }
+
+    fn spawn<F>(future: F, sender: &channel::Sender<Arc<Task>>)
+    where
+        F: Future<Output = ()> + Send + 'static,
+    {
+        let task = Arc::new(Task {
+            future: Mutex::new(Box::pin(future)),
+            executor: sender.clone(),
+        });
+
+        let _ = sender.send(task);
+    }
+
+    fn poll(self: Arc<Self>) {
+        let waker = task::waker(self.clone());
+        let mut cx = Context::from_waker(&waker);
+
+        let mut future = self.future.try_lock().unwrap();
+
+        let _ = future.as_mut().poll(&mut cx);
+    }
+}
+
+impl ArcWake for Task {
+    fn wake_by_ref(arc_self: &Arc<Self>) {
+        arc_self.schedule();
+    }
 }
 
 impl MiniTokio {
     fn new() -> Self {
-        MiniTokio {
-            tasks: VecDeque::new(),
-        }
+        let (sender, scheduled) = channel::unbounded();
+
+        MiniTokio { scheduled, sender }
     }
 
     fn spawn<F>(&mut self, future: F)
     where
         F: Future<Output = ()> + Send + 'static,
     {
-        self.tasks.push_back(Box::pin(future));
+        Task::spawn(future, &self.sender);
     }
 
     fn run(&mut self) {
-        let waker = task::noop_waker();
-        let mut cx = Context::from_waker(&waker);
-
-        while let Some(mut task) = self.tasks.pop_front() {
-            if task.as_mut().poll(&mut cx).is_pending() {
-                self.tasks.push_back(task);
-            }
+        while let Ok(task) = self.scheduled.recv() {
+            task.poll();
         }
     }
 }
