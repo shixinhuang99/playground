@@ -50,7 +50,7 @@ fn main() {
     let c = 0.3_f64;
 
     println!("{} {}", a + b, c);
-    println!("{}", cpm_f64(a + b, c))
+    println!("{}", cmp_f64(a + b, c))
 }
 
 fn add_one(mut num: i32) -> i32 {
@@ -68,6 +68,6 @@ const CONST_STR_1: &'static str = "hello";
 const CONST_STR_2: &str = "world";
 const CONST_STR_3: &'_ str = "!";
 
-fn cpm_f64(a: f64, b: f64) -> bool {
+fn cmp_f64(a: f64, b: f64) -> bool {
     (a - b).abs() < f64::EPSILON
 }
