@@ -1,0 +1,38 @@
+rust is a modern programming language
+rust是一门现代的编程语言
+
+it has strict ownership and borrowing mechanisms
+它有着严格的所有权和借用机制
+
+it can ensure memory safety and efficiency
+它可以保证内存安全和高效性
+
+it can write system-level and application-level software
+它可以编写系统级和应用级的软件
+
+rust has rich features and toolchains
+rust有着丰富的特性和工具链
+
+it supports multiple paradigms and abstraction
+它支持多范式和抽象化
+
+it has an active community and documentation
+它有着活跃的社区和文档
+
+it can interact seamlessly with other languages
+它可以与其他语言无缝交互
+
+rust is a programming language worth learning
+rust是一门值得学习的编程语言
+
+it has elegant syntax and expressiveness
+它有着优雅的语法和表达力
+
+it can help you improve your programming skills
+它可以帮助你提高你的编程技能
+
+it can make you enjoy the fun of programming
+它可以让你享受编程的乐趣
+
+by Bing, the chat mode of Microsoft Bing search
+由Bing，微软Bing搜索的聊天模式所作
