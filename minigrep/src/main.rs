@@ -1,15 +1,23 @@
-use std::{env, fs};
+mod args;
+mod searcher;
 
-fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let args: Vec<String> = env::args().collect();
-    let query = &args[1];
-    let file_path = &args[2];
+use std::{env, process};
 
-    println!("search \"{}\" in file \"{}\".", query, file_path);
+use args::Args;
+use searcher::search;
 
-    let content = fs::read_to_string(file_path)?;
+fn main() {
+    let args = Args::build(env::args().collect()).unwrap_or_else(|err| {
+        eprintln!("{}", err);
+        process::exit(1);
+    });
 
-    println!("file content:\n{}", content);
+    let res = search(args).unwrap_or_else(|err| {
+        eprintln!("{}", err);
+        process::exit(1);
+    });
 
-    Ok(())
+    for ele in res {
+        println!("{}", ele);
+    }
 }
